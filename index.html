@@ -211,11 +211,30 @@
 
     const generateMsgText = (n, t) => `*[RECORDATORIO]*\nBuenas tardes mi hermano, le escribo para recordarle su asignación de:\n*${t.toUpperCase()}*\nGracias por su disposición\n\n*(Por favor para confirmar su asistencia reaccione con un "👍", de lo contrario avíseme lo antes posible. Gracias)*`;
 
+    // Función de copia mejorada con Clipboard API
     window.copyMsg = (n, t) => {
         const text = generateMsgText(n, t);
-        const el = document.createElement('textarea'); el.value = text; document.body.appendChild(el); el.select(); document.execCommand('copy'); document.body.removeChild(el);
-        showToast("Copiado al portapapeles");
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(text).then(() => {
+                showToast("Copiado al portapapeles");
+            }).catch(() => {
+                // Fallback
+                fallbackCopy(text);
+            });
+        } else {
+            fallbackCopy(text);
+        }
     };
+
+    function fallbackCopy(text) {
+        const el = document.createElement('textarea');
+        el.value = text;
+        document.body.appendChild(el);
+        el.select();
+        document.execCommand('copy');
+        document.body.removeChild(el);
+        showToast("Copiado al portapapeles");
+    }
 
     window.sendWA = (n, t) => window.open(`https://wa.me/?text=${encodeURIComponent(generateMsgText(n, t))}`, '_blank');
 
